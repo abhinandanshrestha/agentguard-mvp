@@ -1,0 +1,80 @@
+{
+  "task_id": "task_001",
+  "agent": "mock",
+  "scores": {
+    "correctness": 1.0,
+    "data_quality": 0.0,
+    "security": 1.0,
+    "technical_debt": 1.0,
+    "governance": 1.0
+  },
+  "total": 0.8,
+  "findings": [
+    "Data quality: little evidence of NULL/duplicate handling"
+  ],
+  "evaluated_at": "2026-11-15T23:13:29.047816",
+  "evaluated_sql": true,
+  "query_results": [
+    {
+      "query": "-- Mock solution for task_001\nSELECT l.name AS location_name,\n       l.country,\n       TO_CHAR(dw.date, 'YYYY-MM') AS month,\n       ROUND(AVG(dw.avg_temp_c)::numeric, 1) AS avg_temp_c,\n       MIN(dw.min_temp_c) AS min_temp_c,\n       MAX(dw.max_temp_c) AS max_temp_c,\n       COUNT(*) AS days_recorded\nFROM daily_weather dw\nJOIN locations l ON dw.location_id = l.location_id\nGROUP BY l.name, l.country, TO_CHAR(dw.date, 'YYYY-MM')\nORDER BY l.name, month;",
+      "status": "ok",
+      "row_count": 5,
+      "columns": [
+        "location_name",
+        "country",
+        "month",
+        "avg_temp_c",
+        "min_temp_c",
+        "max_temp_c",
+        "days_recorded"
+      ],
+      "rows": [
+        [
+          "Kathmandu",
+          "Nepal",
+          "2026-11",
+          "14.9",
+          "9.70",
+          "22.80",
+          7
+        ],
+        [
+          "London",
+          "United Kingdom",
+          "2026-11",
+          "5.9",
+          "-0.30",
+          "10.70",
+          7
+        ],
+        [
+          "New York",
+          "United States of America",
+          "2026-11",
+          "10.0",
+          "2.60",
+          "15.90",
+          7
+        ],
+        [
+          "Sydney",
+          "Australia",
+          "2026-11",
+          "19.0",
+          "12.20",
+          "30.70",
+          7
+        ],
+        [
+          "Tokyo",
+          "Japan",
+          "2026-11",
+          "12.3",
+          "5.80",
+          "18.80",
+          7
+        ]
+      ]
+    }
+  ]
+}

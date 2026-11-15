@@ -73,15 +73,15 @@ docs/_build/
 *.sqlite
 *.sqlite3
 
-# Generated benchmark data
-benchmark/retail_platform/data/*.csv
-benchmark/retail_platform/data/*.db
+# # Generated benchmark data
+# benchmark/retail_platform/data/*.csv
+# benchmark/retail_platform/data/*.db
 
-# Experiment results (keep structure, ignore generated content)
-results/**/*.json
-results/**/*.csv
-results/**/*.db
-!results/.gitkeep
+# # Experiment results (keep structure, ignore generated content)
+# results/**/*.json
+# results/**/*.csv
+# results/**/*.db
+# !results/.gitkeep
 
 # OS files
 .DS_Store

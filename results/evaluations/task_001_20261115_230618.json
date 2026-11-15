@@ -1,0 +1,15 @@
+{
+  "task_id": "task_001",
+  "agent": "claude-sonnet-4-5",
+  "scores": {
+    "correctness": 1.0,
+    "data_quality": 0.8,
+    "security": 1.0,
+    "technical_debt": 1.0,
+    "governance": 1.0
+  },
+  "total": 0.96,
+  "findings": [],
+  "evaluated_at": "2026-11-15T23:06:18.488449",
+  "evaluated_sql": true
+}

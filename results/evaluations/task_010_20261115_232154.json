@@ -1,0 +1,19 @@
+{
+  "task_id": "task_010",
+  "agent": "claude-sonnet-4-5",
+  "scores": {
+    "correctness": 0.0,
+    "data_quality": 0.0,
+    "security": 1.0,
+    "technical_debt": 1.0,
+    "governance": 1.0
+  },
+  "total": 0.45,
+  "findings": [
+    "Correctness scored 0: no SQL queries produced",
+    "Data quality scored 0: no SQL to inspect"
+  ],
+  "evaluated_at": "2026-11-15T23:21:54.247280",
+  "evaluated_sql": false,
+  "query_results": []
+}
