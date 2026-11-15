@@ -488,6 +488,9 @@ This is an MVP research prototype with known limitations:
 6. **Limited data window** — Weather data fetched is typically 7–30 days; tasks
    should not assume 60-day windows exist
 
+## Screenshots of the result:
+![alt text](image.png)
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
