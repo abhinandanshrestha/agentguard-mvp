@@ -1,0 +1,120 @@
+# Task 004: Weather ETL Pipeline
+# Difficulty: Hard | Dimensions: Correctness, Technical Debt, Data Quality
+
+id: task_004
+name: Weather ETL Pipeline
+version: "1.0"
+difficulty: hard
+
+description: |
+  Build an ETL pipeline that extracts weather data from CSV files, transforms
+  it with data quality checks, and loads it into the PostgreSQL database.
+  The pipeline must handle incremental loads and be idempotent.
+
+context: |
+  Weather data is delivered as CSV files that need to be processed and loaded
+  into the database. The pipeline must:
+  - Handle both initial loads and incremental updates
+  - Validate data quality before loading
+  - Log all operations for audit purposes
+  - Be resilient to failures (restartable)
+
+schema_hint: |
+  Source CSV files (delivered in the data directory):
+  - locations.csv (location_id, name, region, country, latitude, longitude,
+    timezone_id, query_string)
+  - daily_weather.csv (location_id, date, max_temp_c, min_temp_c, avg_temp_c,
+    max_wind_kph, total_precip_mm, total_snow_cm, avg_visibility_km,
+    avg_humidity, daily_will_it_rain, daily_chance_of_rain,
+    daily_will_it_snow, daily_chance_of_snow, condition_text, condition_code,
+    uv_index, sunrise, sunset, moonrise, moonset, moon_phase, moon_illumination)
+  - hourly_weather.csv (location_id, datetime, temp_c, feels_like_c,
+    dewpoint_c, heatindex_c, windchill_c, wind_kph, wind_degree, wind_dir,
+    gust_kph, pressure_mb, precip_mm, snow_cm, humidity, cloud, visibility_km,
+    uv_index, is_day, condition_text, condition_code, chance_of_rain,
+    chance_of_snow)
+
+  Target PostgreSQL tables: locations, daily_weather, hourly_weather —
+  same column names as the CSVs, plus a SERIAL primary key
+  (locations.location_id, daily_weather.id, hourly_weather.id) and
+  location_id as foreign key to locations.
+
+task: |
+  Create a Python ETL pipeline with the following components:
+  
+  1. **Extract**
+     - Read CSV files from a configurable directory
+     - Support both full and incremental loads
+     - Handle file encoding and delimiter variations
+  
+  2. **Transform**
+     - Validate data types (dates, numbers, strings)
+     - Check referential integrity (location_id exists)
+     - Flag invalid records (don't load, log for review)
+     - Deduplicate within the batch
+  
+  3. **Load**
+     - Upsert logic (INSERT ... ON CONFLICT UPDATE)
+     - Batch processing for performance
+     - Transaction management
+  
+  4. **Logging**
+     - Record counts (extracted, valid, invalid, loaded)
+     - Execution time
+     - Error details
+  
+  The pipeline should be runnable via command line with options for
+  full vs incremental load.
+
+expected_output:
+  format: python_module
+  files:
+    - etl_pipeline.py
+  interface: |
+    # Command line usage:
+    python etl_pipeline.py --source ./data --mode full
+    python etl_pipeline.py --source ./data --mode incremental --since 2024-11-01
+
+evaluation:
+  correctness:
+    weight: 0.30
+    criteria:
+      - Correct data type handling
+      - Accurate record counts
+      - Proper upsert logic
+  
+  technical_debt:
+    weight: 0.30
+    criteria:
+      - Code modularity
+      - Error handling
+      - Configuration management
+      - Testability
+  
+  data_quality:
+    weight: 0.25
+    criteria:
+      - Validation completeness
+      - Invalid record handling
+      - Referential integrity checks
+  
+  governance:
+    weight: 0.15
+    criteria:
+      - Audit logging
+      - Traceability
+      - Documentation
+
+hints:
+  - Use pandas for CSV reading and transformation
+  - psycopg2 or sqlalchemy for database operations
+  - logging module for structured logging
+  - argparse for command line interface
+  - Consider using dataclasses for configuration
+
+tags:
+  - python
+  - etl
+  - pipeline
+  - data-validation
+  - postgresql

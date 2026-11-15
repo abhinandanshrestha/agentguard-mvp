@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-11-15T23:03:50.048085",
+  "generator": "WeatherDataFetcher",
+  "version": "1.0.0",
+  "source": "WeatherAPI.com",
+  "config": {
+    "cities_count": 5,
+    "date_range": {
+      "start": "2026-11-08",
+      "end": "2026-11-14"
+    },
+    "include_hourly": true,
+    "quality_issues_injected": true
+  },
+  "tables": {
+    "locations": {
+      "rows": 5,
+      "columns": [
+        "location_id",
+        "name",
+        "region",
+        "country",
+        "latitude",
+        "longitude",
+        "timezone_id",
+        "query_string"
+      ],
+      "file": "locations.csv",
+      "checksum_md5": "31dda8b3ea646cd396ae5941379cb9a8"
+    },
+    "daily_weather": {
+      "rows": 35,
+      "columns": [
+        "location_id",
+        "date",
+        "max_temp_c",
+        "min_temp_c",
+        "avg_temp_c",
+        "max_wind_kph",
+        "total_precip_mm",
+        "total_snow_cm",
+        "avg_visibility_km",
+        "avg_humidity",
+        "daily_will_it_rain",
+        "daily_chance_of_rain",
+        "daily_will_it_snow",
+        "daily_chance_of_snow",
+        "condition_text",
+        "condition_code",
+        "uv_index",
+        "sunrise",
+        "sunset",
+        "moonrise",
+        "moonset",
+        "moon_phase",
+        "moon_illumination"
+      ],
+      "file": "daily_weather.csv",
+      "checksum_md5": "2da8e71d2be6e5f3f4657e4b3101bdd8"
+    },
+    "hourly_weather": {
+      "rows": 856,
+      "columns": [
+        "location_id",
+        "datetime",
+        "temp_c",
+        "feels_like_c",
+        "wind_kph",
+        "wind_degree",
+        "wind_dir",
+        "pressure_mb",
+        "precip_mm",
+        "snow_cm",
+        "humidity",
+        "cloud",
+        "visibility_km",
+        "uv_index",
+        "gust_kph",
+        "is_day",
+        "condition_text",
+        "condition_code",
+        "chance_of_rain",
+        "chance_of_snow",
+        "dewpoint_c",
+        "heatindex_c",
+        "windchill_c"
+      ],
+      "file": "hourly_weather.csv",
+      "checksum_md5": "3b3ca93cb21e343ad472d390449b903e"
+    }
+  }
+}

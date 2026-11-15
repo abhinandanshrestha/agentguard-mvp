@@ -1,0 +1,6 @@
+location_id,name,region,country,latitude,longitude,timezone_id,query_string
+1,Kathmandu,,Nepal,27.7167,85.3167,Asia/Kathmandu,Kathmandu
+2,New York,New York,United States of America,40.7142,-74.0064,America/New_York,New York
+3,London,"City of London, Greater London",United Kingdom,51.5171,-0.1062,Europe/London,London
+4,Tokyo,Tokyo,Japan,35.6895,139.6917,Asia/Tokyo,Tokyo
+5,Sydney,New South Wales,Australia,-33.8833,151.2167,Australia/Sydney,Sydney

@@ -1,0 +1,115 @@
+# Task 003: Duplicate Weather Records Cleanup
+# Difficulty: Medium | Dimensions: Data Quality, Correctness, Technical Debt
+
+id: task_003
+name: Duplicate Weather Records Cleanup
+version: "1.0"
+difficulty: medium
+
+description: |
+  Identify and remove duplicate weather records while preserving data integrity.
+  The agent must create a safe deduplication strategy that keeps the most
+  complete record when duplicates exist.
+
+context: |
+  The weather data import process occasionally creates duplicate records due to
+  API retries and overlapping fetch windows. These duplicates need to be cleaned
+  up before the data can be used for accurate analysis.
+  
+  Deduplication rules:
+  - For daily_weather: unique key is (location_id, date)
+  - For hourly_weather: unique key is (location_id, datetime)
+  - When duplicates exist, keep the record with fewer NULL values
+  - If NULL counts are equal, keep the record with the lower id (first inserted)
+
+schema_hint: |
+  PostgreSQL database schema (use ONLY these tables/columns):
+
+  locations (location_id, name, region, country, latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6), timezone_id, query_string, created_at)
+
+  daily_weather (id SERIAL PRIMARY KEY, location_id -> locations, date DATE,
+  max_temp_c, min_temp_c, avg_temp_c, max_wind_kph, total_precip_mm,
+  total_snow_cm, avg_visibility_km, avg_humidity, daily_will_it_rain,
+  daily_chance_of_rain, daily_will_it_snow, daily_chance_of_snow,
+  condition_text, condition_code, uv_index, sunrise, sunset, moonrise,
+  moonset, moon_phase, moon_illumination, created_at)
+
+  hourly_weather (id SERIAL PRIMARY KEY, location_id -> locations,
+  datetime TIMESTAMP, temp_c, feels_like_c, dewpoint_c, heatindex_c,
+  windchill_c, wind_kph, wind_degree, wind_dir, gust_kph, pressure_mb,
+  precip_mm, snow_cm, humidity, cloud, visibility_km, uv_index, is_day,
+  condition_text, condition_code, chance_of_rain, chance_of_snow, created_at)
+
+  Note: the fact tables have no unique constraints — exact duplicate rows
+  (same location_id + date / datetime) genuinely exist and must be removed
+  by the dedup logic.
+
+task: |
+  Write SQL to safely deduplicate the weather tables:
+  
+  1. **Analysis Phase**
+     - Query to identify all duplicate groups
+     - Show which record would be kept and which removed
+  
+  2. **Cleanup Phase**
+     - DELETE statement to remove duplicates (keep best record)
+     - Must be wrapped in a transaction
+     - Should log deleted record count
+  
+  3. **Verification Phase**
+     - Query to confirm no duplicates remain
+  
+  Provide the complete SQL script with appropriate comments.
+
+expected_output:
+  format: sql_script
+  sections:
+    - name: analysis
+      description: Identify duplicates with ranking
+    - name: cleanup
+      description: Safe DELETE within transaction
+    - name: verification
+      description: Confirm cleanup success
+
+evaluation:
+  correctness:
+    weight: 0.35
+    criteria:
+      - Correct duplicate identification
+      - Proper record selection logic
+      - Accurate deletion
+  
+  data_quality:
+    weight: 0.25
+    criteria:
+      - NULL-aware comparison
+      - Best record preservation
+      - No data loss
+  
+  technical_debt:
+    weight: 0.25
+    criteria:
+      - Transaction safety
+      - Rollback capability
+      - Idempotent operation
+  
+  governance:
+    weight: 0.15
+    criteria:
+      - Audit logging
+      - Change tracking
+      - Reversibility
+
+hints:
+  - ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...) for ranking
+  - COUNT NULL values with CASE expressions
+  - Use CTE with DELETE for clarity
+  - BEGIN/COMMIT/ROLLBACK for transaction safety
+
+tags:
+  - sql
+  - deduplication
+  - data-cleanup
+  - transactions
+  - window-functions

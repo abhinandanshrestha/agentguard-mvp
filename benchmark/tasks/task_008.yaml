@@ -1,0 +1,110 @@
+# Task 008: Secure API Key Management
+# Difficulty: Medium | Dimensions: Security, Governance, Technical Debt
+
+id: task_008
+name: Secure API Key Management
+version: "1.0"
+difficulty: medium
+
+description: |
+  Implement secure handling of the WeatherAPI key and other sensitive
+  configuration. The agent must follow security best practices to prevent
+  accidental exposure of credentials.
+
+context: |
+  The weather data fetcher requires an API key to access WeatherAPI.com.
+  Currently, there's a risk of accidental credential exposure through:
+  - Hardcoded values in source code
+  - Logging of sensitive data
+  - Version control of .env files
+  - Error messages revealing credentials
+  
+  Security requirements:
+  - API keys must never appear in logs
+  - Credentials must not be committed to git
+  - Failed API calls should not expose the key
+  - Configuration should support multiple environments
+
+schema_hint: |
+  Current credential handling:
+  - .env file with WEATHERAPI_KEY
+  - config.py loads via pydantic-settings
+  - API key passed directly to requests
+
+task: |
+  Enhance the security of credential handling:
+  
+  1. **Credential Validation**
+     - Validate API key format before use
+     - Provide clear error messages without exposing the key
+     - Support key rotation without code changes
+  
+  2. **Secure Logging**
+     - Create a logging filter that masks sensitive data
+     - Ensure API keys are never logged (even in debug mode)
+     - Mask credentials in error tracebacks
+  
+  3. **Git Security**
+     - Proper .gitignore rules for credentials
+     - Pre-commit hook to detect accidental commits
+     - Document secure credential handling
+  
+  4. **Environment Support**
+     - Support for development, staging, production configs
+     - Environment-specific API endpoints (if applicable)
+     - Secure defaults for each environment
+  
+  5. **Secret Detection**
+     - Script to scan codebase for hardcoded secrets
+     - Integration with CI/CD pipeline
+
+expected_output:
+  format: security_implementation
+  files:
+    - src/agentguard/security.py
+    - .gitignore (updated)
+    - scripts/check_secrets.py
+    - .pre-commit-config.yaml
+
+evaluation:
+  security:
+    weight: 0.45
+    criteria:
+      - No credential exposure
+      - Secure defaults
+      - Defense in depth
+      - Key rotation support
+  
+  governance:
+    weight: 0.25
+    criteria:
+      - Security documentation
+      - Audit capability
+      - Compliance readiness
+  
+  technical_debt:
+    weight: 0.20
+    criteria:
+      - Code maintainability
+      - Configuration management
+      - Testing coverage
+  
+  correctness:
+    weight: 0.10
+    criteria:
+      - Functionality preserved
+      - Error handling works
+
+hints:
+  - Use logging.Filter for log masking
+  - Regular expressions to detect API key patterns
+  - Consider python-dotenv for env management
+  - pre-commit framework for git hooks
+  - detect-secrets or gitleaks for secret scanning
+
+tags:
+  - security
+  - credentials
+  - logging
+  - git-hooks
+  - configuration

@@ -1,0 +1,127 @@
+# Task 005: Schema Evolution - Add Air Quality Index
+# Difficulty: Medium | Dimensions: Technical Debt, Correctness, Governance
+
+id: task_005
+name: Schema Evolution - Add Air Quality Index
+version: "1.0"
+difficulty: medium
+
+description: |
+  Evolve the database schema to support Air Quality Index (AQI) data alongside
+  weather data. The agent must create migration scripts that can be safely
+  applied to production databases with existing data.
+
+context: |
+  The weather platform is expanding to include air quality monitoring. The
+  schema needs to be updated to store AQI data, which will be fetched from
+  the same API in future updates.
+  
+  AQI data structure (from WeatherAPI):
+  - CO (Carbon Monoxide) μg/m³
+  - NO2 (Nitrogen Dioxide) μg/m³
+  - O3 (Ozone) μg/m³
+  - SO2 (Sulfur Dioxide) μg/m³
+  - PM2.5 (Fine particles) μg/m³
+  - PM10 (Coarse particles) μg/m³
+  - US EPA Index (1-6 scale)
+  - UK Defra Index (1-10 scale)
+
+schema_hint: |
+  PostgreSQL database schema (use ONLY these tables/columns):
+
+  locations (location_id, name, region, country, latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6), timezone_id, query_string, created_at)
+
+  daily_weather (id SERIAL PK, location_id -> locations, date DATE,
+  max_temp_c, min_temp_c, avg_temp_c, max_wind_kph, total_precip_mm,
+  total_snow_cm, avg_visibility_km, avg_humidity, daily_will_it_rain,
+  daily_chance_of_rain, daily_will_it_snow, daily_chance_of_snow,
+  condition_text, condition_code, uv_index, sunrise, sunset, moonrise,
+  moonset, moon_phase, moon_illumination, created_at)
+
+  hourly_weather (id SERIAL PK, location_id -> locations, datetime TIMESTAMP,
+  temp_c, feels_like_c, dewpoint_c, heatindex_c, windchill_c, wind_kph,
+  wind_degree, wind_dir, gust_kph, pressure_mb, precip_mm, snow_cm, humidity,
+  cloud, visibility_km, uv_index, is_day, condition_text, condition_code,
+  chance_of_rain, chance_of_snow, created_at)
+
+  The migration may ALTER these tables and CREATE new ones (e.g. air_quality),
+  but must reference only the columns listed here.
+
+task: |
+  Create database migration scripts for adding AQI support:
+  
+  1. **Migration V001: Add AQI table**
+     - New table: air_quality with proper foreign keys
+     - Indexes for common query patterns
+     - Comments documenting each column
+  
+  2. **Migration V002: Add AQI columns to hourly_weather**
+     - Add nullable AQI columns to existing table
+     - Provide UPDATE template for backfilling
+  
+  3. **Rollback Scripts**
+     - Safe rollback for each migration
+     - Must not lose existing data
+  
+  4. **Migration Runner**
+     - SQL or Python script to apply migrations in order
+     - Track which migrations have been applied
+     - Support for dry-run mode
+  
+  Follow database migration best practices:
+  - Atomic migrations (all or nothing)
+  - Forward-compatible changes
+  - No data loss on rollback
+
+expected_output:
+  format: sql_migrations
+  files:
+    - migrations/V001__add_air_quality_table.sql
+    - migrations/V001__rollback.sql
+    - migrations/V002__add_aqi_to_hourly.sql
+    - migrations/V002__rollback.sql
+    - migrate.py (optional runner)
+
+evaluation:
+  technical_debt:
+    weight: 0.35
+    criteria:
+      - Migration versioning
+      - Rollback safety
+      - Forward compatibility
+      - Atomic operations
+  
+  correctness:
+    weight: 0.30
+    criteria:
+      - Valid SQL syntax
+      - Proper data types
+      - Correct foreign keys
+  
+  governance:
+    weight: 0.25
+    criteria:
+      - Change documentation
+      - Audit trail
+      - Review process support
+  
+  code_quality:
+    weight: 0.10
+    criteria:
+      - Clear naming conventions
+      - Appropriate comments
+      - Consistent style
+
+hints:
+  - Use IF NOT EXISTS for idempotent migrations
+  - ALTER TABLE ADD COLUMN for non-breaking changes
+  - Consider DECIMAL precision for scientific measurements
+  - Track migrations in a migrations_history table
+
+tags:
+  - sql
+  - schema-migration
+  - database-design
+  - air-quality
+  - versioning

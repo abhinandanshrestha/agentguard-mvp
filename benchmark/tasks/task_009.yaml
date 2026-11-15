@@ -1,0 +1,123 @@
+# Task 009: Location Data Privacy Compliance
+# Difficulty: Medium | Dimensions: Governance, Security, Data Quality
+
+id: task_009
+name: Location Data Privacy Compliance
+version: "1.0"
+difficulty: medium
+
+description: |
+  Implement privacy controls for location data. While weather data itself is
+  not personally identifiable, precise coordinates combined with timestamps
+  could potentially be used for tracking. The agent must implement appropriate
+  privacy safeguards.
+
+context: |
+  The weather platform stores precise latitude/longitude coordinates for each
+  location. In some use cases, this granularity may not be needed and could
+  pose privacy risks if combined with other datasets.
+  
+  Privacy requirements:
+  - Support for coordinate precision reduction
+  - Data retention policies
+  - Access logging for sensitive queries
+  - Export controls for bulk data
+
+schema_hint: |
+  PostgreSQL database schema (use ONLY these tables/columns):
+
+  locations (location_id, name, region, country, latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6), timezone_id, query_string, created_at) — the
+  quasi-identifier table holding coordinates
+
+  daily_weather (id, location_id -> locations, date DATE, max_temp_c,
+  min_temp_c, avg_temp_c, max_wind_kph, total_precip_mm, total_snow_cm,
+  avg_visibility_km, avg_humidity, daily_will_it_rain, daily_chance_of_rain,
+  daily_will_it_snow, daily_chance_of_snow, condition_text, condition_code,
+  uv_index, sunrise, sunset, moonrise, moonset, moon_phase, moon_illumination,
+  created_at)
+
+  hourly_weather (id, location_id -> locations, datetime TIMESTAMP, temp_c,
+  feels_like_c, dewpoint_c, heatindex_c, windchill_c, wind_kph, wind_degree,
+  wind_dir, gust_kph, pressure_mb, precip_mm, snow_cm, humidity, cloud,
+  visibility_km, uv_index, is_day, condition_text, condition_code,
+  chance_of_rain, chance_of_snow, created_at)
+
+task: |
+  Implement privacy controls for the weather platform:
+  
+  1. **Coordinate Generalization**
+     - Function to reduce coordinate precision (e.g., to city level)
+     - View that exposes only generalized coordinates
+     - Configuration for precision levels by use case
+  
+  2. **Data Retention**
+     - Policy definition for data retention periods
+     - SQL script to purge data older than retention period
+     - Archival strategy for historical data
+  
+  3. **Access Logging**
+     - Log queries accessing location data
+     - Track bulk exports
+     - Alert on unusual access patterns
+  
+  4. **Data Export Controls**
+     - Function to export data with privacy controls applied
+     - Support for different export formats (CSV, JSON)
+     - Audit trail for all exports
+  
+  5. **Documentation**
+     - Privacy policy template
+     - Data handling procedures
+     - Compliance checklist
+
+expected_output:
+  format: privacy_implementation
+  files:
+    - src/agentguard/privacy.py
+    - sql/privacy_views.sql
+    - sql/retention_policy.sql
+    - docs/PRIVACY.md
+
+evaluation:
+  governance:
+    weight: 0.40
+    criteria:
+      - Policy completeness
+      - Audit capability
+      - Documentation quality
+      - Compliance alignment
+  
+  security:
+    weight: 0.30
+    criteria:
+      - Data protection effectiveness
+      - Access controls
+      - Export restrictions
+  
+  correctness:
+    weight: 0.20
+    criteria:
+      - Generalization accuracy
+      - Retention logic correctness
+      - Export functionality
+  
+  technical_debt:
+    weight: 0.10
+    criteria:
+      - Code maintainability
+      - Configuration flexibility
+
+hints:
+  - ROUND(latitude, 2) gives ~1km precision
+  - ROUND(latitude, 1) gives ~10km precision
+  - PostgreSQL triggers for access logging
+  - Consider GDPR/CCPA requirements
+  - pg_stat_statements for query auditing
+
+tags:
+  - privacy
+  - governance
+  - gdpr
+  - data-retention
+  - coordinates

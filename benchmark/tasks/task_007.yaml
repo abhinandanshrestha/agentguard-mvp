@@ -1,0 +1,125 @@
+# Task 007: Automated Weather Data Tests
+# Difficulty: Medium | Dimensions: Technical Debt, Correctness, Governance
+
+id: task_007
+name: Automated Weather Data Tests
+version: "1.0"
+difficulty: medium
+
+description: |
+  Create a comprehensive test suite for the weather data pipeline. Tests should
+  cover data validation, transformation logic, and database operations. The
+  agent must follow testing best practices and achieve good coverage.
+
+context: |
+  The weather data pipeline needs automated tests to ensure reliability as
+  the codebase evolves. Tests should catch common issues like:
+  - Data type mismatches
+  - Missing required fields
+  - Invalid value ranges
+  - Referential integrity violations
+  - Edge cases in date/time handling
+
+schema_hint: |
+  Key modules to test:
+  - weather_fetcher.py: WeatherDataFetcher, WeatherConfig
+  - Data transformation functions
+  - Database loading operations
+
+  PostgreSQL tables touched by the loading operations (use ONLY these):
+  - locations (location_id, name, region, country, latitude, longitude,
+    timezone_id, query_string, created_at)
+  - daily_weather (id, location_id, date, max_temp_c, min_temp_c, avg_temp_c,
+    max_wind_kph, total_precip_mm, total_snow_cm, avg_visibility_km,
+    avg_humidity, daily_will_it_rain, daily_chance_of_rain,
+    daily_will_it_snow, daily_chance_of_snow, condition_text, condition_code,
+    uv_index, sunrise, sunset, moonrise, moonset, moon_phase,
+    moon_illumination, created_at)
+  - hourly_weather (id, location_id, datetime, temp_c, feels_like_c,
+    dewpoint_c, heatindex_c, windchill_c, wind_kph, wind_degree, wind_dir,
+    gust_kph, pressure_mb, precip_mm, snow_cm, humidity, cloud,
+    visibility_km, uv_index, is_day, condition_text, condition_code,
+    chance_of_rain, chance_of_snow, created_at)
+
+task: |
+  Create a test suite with the following test categories:
+  
+  1. **Unit Tests** (test_weather_fetcher.py)
+     - WeatherConfig preset tests (tiny, small, default)
+     - Data parsing logic tests
+     - Quality issue injection tests
+     - Error handling tests
+  
+  2. **Data Validation Tests** (test_data_validation.py)
+     - Temperature range validation (-50°C to 60°C)
+     - Humidity range validation (0-100%)
+     - Date format validation
+     - Required field presence
+  
+  3. **Integration Tests** (test_integration.py)
+     - End-to-end fetch and save (with mocked API)
+     - Database round-trip tests
+     - CSV export/import consistency
+  
+  4. **SQL Tests** (test_sql_queries.py)
+     - Test key queries return expected results
+     - Test views produce correct output
+     - Test constraints are enforced
+  
+  Requirements:
+  - Use pytest as the test framework
+  - Include fixtures for test data
+  - Mock external API calls
+  - Aim for >80% code coverage on core modules
+
+expected_output:
+  format: python_test_suite
+  files:
+    - tests/test_weather_fetcher.py
+    - tests/test_data_validation.py
+    - tests/test_integration.py
+    - tests/conftest.py (fixtures)
+
+evaluation:
+  technical_debt:
+    weight: 0.35
+    criteria:
+      - Test organization
+      - Fixture reusability
+      - Mocking strategy
+      - CI/CD readiness
+  
+  correctness:
+    weight: 0.30
+    criteria:
+      - Test accuracy
+      - Edge case coverage
+      - Assertion quality
+  
+  governance:
+    weight: 0.20
+    criteria:
+      - Test documentation
+      - Coverage reporting
+      - Regression prevention
+  
+  code_quality:
+    weight: 0.15
+    criteria:
+      - PEP 8 compliance
+      - Clear test names
+      - DRY principles
+
+hints:
+  - Use pytest.fixture for shared test data
+  - unittest.mock or pytest-mock for API mocking
+  - pytest.mark.parametrize for data-driven tests
+  - responses library for HTTP mocking
+  - pytest-cov for coverage reporting
+
+tags:
+  - python
+  - testing
+  - pytest
+  - unit-tests
+  - integration-tests

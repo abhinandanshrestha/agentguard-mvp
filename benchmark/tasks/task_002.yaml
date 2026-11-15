@@ -1,0 +1,123 @@
+# Task 002: Weather Data Quality Validation
+# Difficulty: Medium | Dimensions: Data Quality, Correctness
+
+id: task_002
+name: Weather Data Quality Validation
+version: "1.0"
+difficulty: medium
+
+description: |
+  Create a comprehensive data quality report identifying issues in the weather
+  dataset. The agent must detect duplicates, null values, invalid ranges, and
+  referential integrity problems.
+
+context: |
+  The weather data has been imported from an external API and may contain
+  various data quality issues that need to be identified before analysis.
+  
+  Known potential issues:
+  - Duplicate records (same location_id + date/datetime)
+  - NULL values in critical fields
+  - Invalid humidity values (should be 0-100)
+  - Invalid temperature values (outside realistic ranges)
+  - Orphan records (location_id not in locations table)
+
+schema_hint: |
+  PostgreSQL database schema (use ONLY these tables/columns):
+
+  locations (location_id, name, region, country, latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6), timezone_id, query_string, created_at)
+
+  daily_weather (id, location_id -> locations, date DATE, max_temp_c,
+  min_temp_c, avg_temp_c, max_wind_kph, total_precip_mm, total_snow_cm,
+  avg_visibility_km, avg_humidity, daily_will_it_rain, daily_chance_of_rain,
+  daily_will_it_snow, daily_chance_of_snow, condition_text, condition_code,
+  uv_index, sunrise, sunset, moonrise, moonset, moon_phase, moon_illumination,
+  created_at)
+
+  hourly_weather (id, location_id -> locations, datetime TIMESTAMP, temp_c,
+  feels_like_c, dewpoint_c, heatindex_c, windchill_c, wind_kph, wind_degree,
+  wind_dir, gust_kph, pressure_mb, precip_mm, snow_cm, humidity, cloud,
+  visibility_km, uv_index, is_day, condition_text, condition_code,
+  chance_of_rain, chance_of_snow, created_at)
+
+  data_quality_log (id, table_name, issue_type, record_id, column_name,
+  original_value, injected_value, created_at) — logs every issue injected
+  during data generation; issue_type is one of 'duplicate', 'null', 'invalid'.
+
+  View v_data_quality_summary (table_name, total_records,
+  potential_duplicates, null_values)
+
+task: |
+  Write SQL queries that produce a data quality report containing:
+  
+  1. **Duplicate Detection**
+     - Count of duplicate records in daily_weather (same location_id + date)
+     - Count of duplicate records in hourly_weather (same location_id + datetime)
+  
+  2. **NULL Value Analysis**
+     - Count of NULL values per critical column (temp, humidity, precip)
+     - Percentage of NULL values relative to total records
+  
+  3. **Range Validation**
+     - Records with humidity < 0 or > 100
+     - Records with temperature < -50°C or > 60°C
+     - Records with negative precipitation
+  
+  4. **Referential Integrity**
+     - Weather records with location_id not in locations table
+  
+  Output should be a summary table or multiple result sets.
+
+expected_output:
+  format: report
+  sections:
+    - name: duplicates
+      columns: [table_name, duplicate_count]
+    - name: null_analysis
+      columns: [table_name, column_name, null_count, null_percentage]
+    - name: invalid_ranges
+      columns: [table_name, issue_type, record_count]
+    - name: orphan_records
+      columns: [table_name, orphan_count]
+
+evaluation:
+  data_quality:
+    weight: 0.5
+    criteria:
+      - All issue types detected
+      - Accurate counts
+      - Comprehensive coverage
+  
+  correctness:
+    weight: 0.3
+    criteria:
+      - Correct duplicate detection logic
+      - Accurate NULL counting
+      - Proper range checking
+  
+  code_quality:
+    weight: 0.15
+    criteria:
+      - Organized query structure
+      - Reusable patterns
+      - Clear comments
+  
+  governance:
+    weight: 0.05
+    criteria:
+      - Audit trail considerations
+      - Reproducible results
+
+hints:
+  - GROUP BY with HAVING can detect duplicates
+  - COUNT(*) vs COUNT(column) for NULL detection
+  - LEFT JOIN with NULL check for orphan detection
+  - UNION ALL can combine multiple checks into one report
+
+tags:
+  - sql
+  - data-quality
+  - validation
+  - duplicates
+  - null-handling

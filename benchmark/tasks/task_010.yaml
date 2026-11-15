@@ -1,0 +1,146 @@
+# Task 010: Debug Weather Data Anomalies
+# Difficulty: Hard | Dimensions: Correctness, Data Quality, Technical Debt
+
+id: task_010
+name: Debug Weather Data Anomalies
+version: "1.0"
+difficulty: hard
+
+description: |
+  Investigate and fix anomalies in the weather data. The agent must use
+  debugging skills to identify root causes, implement fixes, and add
+  safeguards to prevent recurrence.
+
+context: |
+  Users have reported several anomalies in the weather dashboard:
+  
+  1. Some cities show impossibly high temperatures (>100°C)
+  2. Hourly data doesn't aggregate correctly to daily summaries
+  3. Precipitation totals are negative for some locations
+  4. Moon phase is showing as "Full Moon" every day for one city
+  5. Some datetime values appear to be in the wrong timezone
+  
+  The bugs may be in:
+  - Data fetching logic
+  - Data transformation/parsing
+  - Database constraints
+  - Query logic
+  - A combination of the above
+
+schema_hint: |
+  PostgreSQL database schema (use ONLY these tables/columns — they are the
+  complete list; any other table name does not exist):
+
+  locations (location_id, name, region, country, latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6), timezone_id, query_string, created_at)
+
+  daily_weather (id, location_id -> locations, date DATE, max_temp_c,
+  min_temp_c, avg_temp_c, max_wind_kph, total_precip_mm, total_snow_cm,
+  avg_visibility_km, avg_humidity, daily_will_it_rain, daily_chance_of_rain,
+  daily_will_it_snow, daily_chance_of_snow, condition_text, condition_code,
+  uv_index, sunrise, sunset, moonrise, moonset, moon_phase, moon_illumination,
+  created_at)
+
+  hourly_weather (id, location_id -> locations, datetime TIMESTAMP, temp_c,
+  feels_like_c, dewpoint_c, heatindex_c, windchill_c, wind_kph, wind_degree,
+  wind_dir, gust_kph, pressure_mb, precip_mm, snow_cm, humidity, cloud,
+  visibility_km, uv_index, is_day, condition_text, condition_code,
+  chance_of_rain, chance_of_snow, created_at)
+
+  data_quality_log (id, table_name, issue_type, record_id, column_name,
+  original_value, injected_value, created_at) — logs every issue injected
+  during data generation; issue_type is one of 'duplicate', 'null', 'invalid'.
+
+  Views: v_daily_weather_full (daily_weather joined with location details),
+  v_monthly_averages, v_extreme_weather, v_data_quality_summary.
+
+  Known injected anomalies (from the data generator, seed=42):
+  - ~2% exact duplicate rows in daily_weather and hourly_weather
+  - ~3% NULL values in numeric measurement columns (temperature, humidity,
+    visibility, uv_index, moon_illumination, chance_of_*)
+  - ~1% invalid values: avg_humidity = 150 in daily_weather,
+    humidity = -10 in hourly_weather
+  - moonrise/moonset may be NULL when the moon "Does not set today"
+  - Dates span a few days in November 2026 for 5 cities; there is no
+    30/60-day history, so time-window predicates should not assume one
+
+task: |
+  Debug and fix the weather data anomalies:
+  
+  1. **Investigation**
+     - Write queries to identify the scope of each issue
+     - Trace data from API response to database
+     - Document findings for each anomaly
+  
+  2. **Root Cause Analysis**
+     - Identify the source of each bug
+     - Explain why the bug occurs
+     - Assess impact on existing data
+  
+  3. **Fixes**
+     - Implement code fixes for each issue
+     - Add database constraints to prevent invalid data
+     - Create data cleanup scripts for existing bad data
+  
+  4. **Prevention**
+     - Add validation at appropriate layers
+     - Implement monitoring/alerting for anomalies
+     - Add tests to catch regressions
+  
+  5. **Documentation**
+     - Post-mortem report for each issue
+     - Updated data quality documentation
+
+expected_output:
+  format: debug_report
+  sections:
+    - investigation_queries
+    - root_cause_analysis
+    - code_fixes
+    - data_cleanup_scripts
+    - prevention_measures
+    - post_mortem_report
+
+evaluation:
+  correctness:
+    weight: 0.35
+    criteria:
+      - All bugs identified
+      - Root causes found
+      - Fixes are correct
+  
+  data_quality:
+    weight: 0.25
+    criteria:
+      - Data cleanup completeness
+      - Validation improvements
+      - Monitoring additions
+  
+  technical_debt:
+    weight: 0.25
+    criteria:
+      - Fix quality
+      - Test coverage
+      - Code maintainability
+  
+  governance:
+    weight: 0.15
+    criteria:
+      - Documentation quality
+      - Post-mortem completeness
+      - Process improvements
+
+hints:
+  - Start with queries to find specific anomaly examples
+  - Check data type conversions in Python
+  - Verify timezone handling (API uses local time)
+  - Look for integer overflow or type coercion issues
+  - CHECK constraints can enforce valid ranges
+  - Consider adding a data validation layer
+
+tags:
+  - debugging
+  - data-quality
+  - root-cause-analysis
+  - bug-fixing
+  - monitoring

@@ -1,0 +1,151 @@
+# Task 006: Weather Query Optimization
+# Difficulty: Hard | Dimensions: Technical Debt, Correctness
+
+id: task_006
+name: Weather Query Optimization
+version: "1.0"
+difficulty: hard
+
+description: |
+  Optimize slow-running weather analytics queries. The agent must analyze
+  query execution plans, identify bottlenecks, and implement optimizations
+  including indexing strategies and query rewrites.
+
+context: |
+  The weather analytics dashboard is experiencing slow query performance as
+  the dataset grows. Several key queries are taking too long to execute,
+  affecting user experience.
+  
+  Current dataset size:
+  - locations: ~10 rows
+  - daily_weather: ~300 rows (10 cities × 30 days)
+  - hourly_weather: ~7,200 rows (10 cities × 30 days × 24 hours)
+  
+  Note: While current data is small, queries should be optimized for
+  production scale (1000+ locations, years of historical data).
+schema_hint: |
+  PostgreSQL database schema (use ONLY these tables/columns):
+
+  locations (location_id, name, region, country, latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6), timezone_id, query_string, created_at)
+
+  daily_weather (id SERIAL PK, location_id -> locations, date DATE,
+  max_temp_c, min_temp_c, avg_temp_c, max_wind_kph, total_precip_mm,
+  total_snow_cm, avg_visibility_km, avg_humidity, daily_will_it_rain,
+  daily_chance_of_rain, daily_will_it_snow, daily_chance_of_snow,
+  condition_text, condition_code, uv_index, sunrise, sunset, moonrise,
+  moonset, moon_phase, moon_illumination, created_at)
+
+  hourly_weather (id SERIAL PK, location_id -> locations, datetime TIMESTAMP,
+  temp_c, feels_like_c, dewpoint_c, heatindex_c, windchill_c, wind_kph,
+  wind_degree, wind_dir, gust_kph, pressure_mb, precip_mm, snow_cm, humidity,
+  cloud, visibility_km, uv_index, is_day, condition_text, condition_code,
+  chance_of_rain, chance_of_snow, created_at)
+
+  Existing indexes:
+  - locations: PRIMARY KEY (location_id), idx_locations_country (country),
+    idx_locations_name (name)
+  - daily_weather: PRIMARY KEY (id), idx_daily_weather_date (date),
+    idx_daily_weather_location (location_id),
+    idx_daily_weather_condition (condition_code)
+  - hourly_weather: PRIMARY KEY (id), idx_hourly_weather_datetime (datetime),
+    idx_hourly_weather_location (location_id),
+    idx_hourly_weather_date ((datetime::date), functional index)
+task: |
+  Optimize the following queries:
+  
+  **Query 1: City Temperature Comparison**
+  ```sql
+  SELECT l.name, l.country,
+         AVG(dw.avg_temp_c) as avg_temp,
+         MIN(dw.min_temp_c) as coldest,
+         MAX(dw.max_temp_c) as hottest
+  FROM locations l
+  LEFT JOIN daily_weather dw ON l.location_id = dw.location_id
+  WHERE dw.date BETWEEN '2024-11-01' AND '2024-11-30'
+  GROUP BY l.name, l.country
+  ORDER BY avg_temp DESC;
+  ```
+  
+  **Query 2: Hourly Temperature Trends**
+  ```sql
+  SELECT DATE(datetime) as day,
+         EXTRACT(HOUR FROM datetime) as hour,
+         AVG(temp_c) as avg_temp,
+         AVG(humidity) as avg_humidity
+  FROM hourly_weather
+  WHERE location_id = 1
+    AND datetime >= NOW() - INTERVAL '7 days'
+  GROUP BY DATE(datetime), EXTRACT(HOUR FROM datetime)
+  ORDER BY day, hour;
+  ```
+  
+  **Query 3: Precipitation Analysis**
+  ```sql
+  SELECT l.name,
+         SUM(dw.total_precip_mm) as total_precip,
+         COUNT(CASE WHEN dw.daily_will_it_rain = 1 THEN 1 END) as rainy_days,
+         AVG(dw.daily_chance_of_rain) as avg_rain_chance
+  FROM daily_weather dw
+  JOIN locations l ON dw.location_id = l.location_id
+  GROUP BY l.name
+  HAVING SUM(dw.total_precip_mm) > 0
+  ORDER BY total_precip DESC;
+  ```
+  
+  For each query, provide:
+  1. EXPLAIN ANALYZE output (before optimization)
+  2. Analysis of performance issues
+  3. Recommended indexes
+  4. Rewritten query (if applicable)
+  5. EXPLAIN ANALYZE output (after optimization)
+  6. Performance improvement summary
+
+expected_output:
+  format: optimization_report
+  sections:
+    - query_analysis
+    - index_recommendations
+    - rewritten_queries
+    - performance_comparison
+
+evaluation:
+  technical_debt:
+    weight: 0.40
+    criteria:
+      - Index selection rationale
+      - Query rewrite quality
+      - Scalability considerations
+  
+  correctness:
+    weight: 0.35
+    criteria:
+      - Queries return same results
+      - Valid index definitions
+      - Proper EXPLAIN interpretation
+  
+  code_quality:
+    weight: 0.15
+    criteria:
+      - Clear optimization documentation
+      - Maintainable query structure
+  
+  governance:
+    weight: 0.10
+    criteria:
+      - Change impact assessment
+      - Rollback considerations
+
+hints:
+  - Composite indexes for multi-column filters
+  - Covering indexes to avoid table lookups
+  - Partial indexes for filtered queries
+  - Consider materialized views for complex aggregations
+  - EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT) for detailed analysis
+
+tags:
+  - sql
+  - optimization
+  - indexing
+  - query-tuning
+  - performance

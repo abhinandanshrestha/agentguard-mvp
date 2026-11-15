@@ -1,0 +1,113 @@
+# Task 001: Monthly Temperature Analysis
+# Difficulty: Easy | Dimensions: Correctness, Data Quality
+
+id: task_001
+name: Monthly Temperature Analysis
+version: "1.0"
+difficulty: easy
+
+description: |
+  Calculate monthly average, minimum, and maximum temperatures for each location.
+  The agent must handle potential null values and data quality issues in the
+  temperature readings.
+
+context: |
+  You are working with historical weather data from WeatherAPI.com stored in
+  a PostgreSQL database. The data contains daily weather summaries for multiple
+  cities across different countries.
+  
+  The daily_weather table may contain data quality issues including:
+  - Null temperature values
+  - Duplicate records (same location_id + date)
+  - Invalid values (temperatures outside reasonable ranges)
+
+schema_hint: |
+  PostgreSQL database schema (use ONLY these tables/columns):
+
+  locations (location_id, name, region, country, latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6), timezone_id, query_string, created_at)
+
+  daily_weather (id, location_id -> locations, date DATE, max_temp_c,
+  min_temp_c, avg_temp_c, max_wind_kph, total_precip_mm, total_snow_cm,
+  avg_visibility_km, avg_humidity, daily_will_it_rain, daily_chance_of_rain,
+  daily_will_it_snow, daily_chance_of_snow, condition_text, condition_code,
+  uv_index, sunrise, sunset, moonrise, moonset, moon_phase, moon_illumination,
+  created_at)
+
+  View v_monthly_averages (location_id, month, days_recorded, avg_temp_c,
+  max_temp_c, min_temp_c, total_precip_mm, avg_humidity, avg_max_wind_kph)
+
+task: |
+  Write a SQL query that produces a monthly temperature report with:
+  1. Location name and country
+  2. Month (YYYY-MM format)
+  3. Average of daily average temperatures
+  4. Absolute minimum temperature recorded
+  5. Absolute maximum temperature recorded
+  6. Number of days with valid temperature data
+  
+  Requirements:
+  - Handle NULL temperature values appropriately
+  - Remove duplicate records before aggregation
+  - Order results by location name, then month
+  - Round temperature values to 1 decimal place
+
+expected_output:
+  format: table
+  columns:
+    - location_name
+    - country
+    - month
+    - avg_temp_c
+    - min_temp_c
+    - max_temp_c
+    - days_recorded
+  sample_row:
+    location_name: "Kathmandu"
+    country: "Nepal"
+    month: "2024-11"
+    avg_temp_c: 15.6
+    min_temp_c: 8.2
+    max_temp_c: 24.1
+    days_recorded: 28
+
+evaluation:
+  correctness:
+    weight: 0.4
+    criteria:
+      - Correct aggregation logic (AVG, MIN, MAX)
+      - Proper date truncation to month
+      - Accurate row counts
+  
+  data_quality:
+    weight: 0.3
+    criteria:
+      - NULL handling in temperature columns
+      - Duplicate detection and removal
+      - Invalid value filtering (optional bonus)
+  
+  code_quality:
+    weight: 0.2
+    criteria:
+      - Clear and readable SQL
+      - Appropriate use of JOINs
+      - Efficient query structure
+  
+  governance:
+    weight: 0.1
+    criteria:
+      - No hardcoded values
+      - Parameterizable query structure
+
+hints:
+  - Use DISTINCT or window functions to handle duplicates
+  - COALESCE can help with NULL handling
+  - DATE_TRUNC('month', date) extracts the month
+  - Consider using a CTE for deduplication
+
+tags:
+  - sql
+  - aggregation
+  - data-quality
+  - temperature
+  - monthly-report
